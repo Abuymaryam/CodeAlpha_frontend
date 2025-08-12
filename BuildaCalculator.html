@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Bestoo Calculator — VIP Deluxe ✨</title>
+<style>
+  :root{
+    /* light theme */
+    --bg: #f3f6fb;
+    --panel-bg: linear-gradient(135deg,#ffffff,#eef6ff);
+    --primary: #6c63ff;
+    --primary-2: #8b5cf6;
+    --muted: #98a0b3;
+    --text: #0f1724;
+    --glass: rgba(255,255,255,0.75);
+    --shadow: 0 10px 30px rgba(20,30,80,0.06);
+    --btn-shadow: 0 8px 24px rgba(108,99,255,0.08);
+    --accent-text: white;
+    --history-bg: rgba(255,255,255,0.9);
+  }
+
+  [data-theme="dark"]{
+    --bg: #071025;
+    --panel-bg: linear-gradient(180deg,#0b1220,#071025);
+    --primary: #7c5cff;
+    --primary-2: #5b78ff;
+    --muted: #a9b3c3;
+    --text: #e6eef9;
+    --glass: rgba(255,255,255,0.03);
+    --shadow: 0 10px 30px rgba(0,0,0,0.6);
+    --btn-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    --accent-text: white;
+    --history-bg: rgba(255,255,255,0.03);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(108,99,255,0.06), transparent 15%),
+                radial-gradient(1000px 500px at 90% 90%, rgba(139,92,246,0.04), transparent 15%),
+                var(--bg);
+    padding:20px;
+    color:var(--text);
+  }
+
+  /* layout */
+  .wrap{
+    width:920px;
+    max-width:96vw;
+    display:grid;
+    grid-template-columns: 1fr 320px;
+    gap:18px;
+    align-items:start;
+  }
+
+  /* card */
+  .card{
+    border-radius:18px;
+    background:var(--panel-bg);
+    padding:18px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(120,130,200,0.06);
+    min-height:420px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+  }
+  .brand{
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .logo{
+    width:56px;height:56px;border-radius:12px;
+    background: linear-gradient(135deg,var(--primary),var(--primary-2));
+    display:grid;place-items:center;color:var(--accent-text);
+    font-weight:700;font-size:22px;box-shadow:var(--btn-shadow);
+  }
+  .title{
+    font-size:16px;font-weight:700;
+  }
+  .subtitle{font-size:12px;color:var(--muted);margin-top:3px}
+
+  .controls{
+    display:flex;gap:8px;align-items:center;
+  }
+  .small-btn{
+    border:0;padding:8px 10px;border-radius:10px;cursor:pointer;
+    background:var(--glass); color:var(--text); box-shadow:var(--btn-shadow);
+    font-weight:600;
+  }
+  .toggle{
+    display:inline-flex;align-items:center;gap:8px;padding:8px;border-radius:999px;background:transparent;border:1px solid rgba(0,0,0,0.06);
+    color:var(--muted);font-size:13px;
+  }
+
+  /* screen */
+  .screen {
+    border-radius:12px;padding:14px;background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(250,250,255,0.9));
+    box-shadow: 0 6px 18px rgba(10,20,40,0.04) inset; display:flex;flex-direction:column; gap:8px;
+  }
+  .expr{ font-size:20px; text-align:right; min-height:28px; word-wrap:break-word; color:var(--text) }
+  .preview{ font-size:14px; text-align:right; color:var(--muted); min-height:18px }
+
+  .keys{
+    display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-top:6px;
+  }
+  button.key{
+    border:0;padding:16px;border-radius:12px;font-size:18px;cursor:pointer;transition:transform .08s ease, box-shadow .12s;
+    box-shadow: var(--btn-shadow); background: var(--glass); color:var(--text); font-weight:600;
+  }
+  button.key:active{ transform: translateY(2px) scale(.996) }
+  button.key:hover{ transform: translateY(-4px) }
+
+  .operator{ background: linear-gradient(180deg,#faf5ff,#f3edff); color:var(--primary); box-shadow: 0 8px 22px rgba(108,99,255,0.06) }
+  .equal{ grid-column: span 2; background: linear-gradient(90deg,var(--primary),var(--primary-2)); color:white; font-size:18px }
+  .clear{ background: linear-gradient(180deg,#fff5f5,#fff0f0); color:#b91c1c }
+  .wide{ grid-column: span 2 }
+
+  /* history panel */
+  .history{
+    border-radius:14px;padding:12px;background:var(--history-bg);box-shadow:var(--shadow);min-height:420px;display:flex;flex-direction:column;gap:10px;
+  }
+  .hist-header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .hist-list{overflow:auto;padding-right:6px;display:flex;flex-direction:column;gap:8px}
+  .hist-item{padding:10px;border-radius:10px;background:transparent;border:1px dashed rgba(0,0,0,0.04);cursor:pointer;display:flex;flex-direction:column}
+  .hist-item:hover{transform:translateY(-3px);box-shadow:var(--btn-shadow)}
+  .hist-exp{font-weight:700;color:var(--text);font-size:14px}
+  .hist-res{font-size:13px;color:var(--muted)}
+
+  .empty{color:var(--muted);font-size:14px;text-align:center;padding:28px 6px;border-radius:8px;background:transparent}
+
+  /* footer small note */
+  .help{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12px;color:var(--muted)}
+
+  /* responsive */
+  @media (max-width:980px){
+    .wrap{grid-template-columns:1fr 280px;gap:12px}
+  }
+  @media (max-width:760px){
+    .wrap{grid-template-columns:1fr; align-items:stretch}
+    .history{order:2}
+  }
+
+</style>
+</head>
+<body data-theme="light">
+<div class="wrap" role="application" aria-label=" Deluxe Calculator ">
+  <main class="card" aria-label="Calculator main">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">C</div>
+        <div>
+          <div class="title"> Calculator — VIP </div>
+          <div class="subtitle">History • Percent • Dark/Light • Keyboard</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="themeBtn" class="small-btn" title="Toggle theme (T)">🌙 Theme</button>
+        <button id="clearHistoryBtn" class="small-btn" title="Clear history">🧾 Clear History</button>
+      </div>
+    </div>
+
+    <div class="screen" aria-live="polite">
+      <div id="expression" class="expr" aria-label="Expression" tabindex="0">0</div>
+      <div id="preview" class="preview" aria-label="Preview result">0</div>
+    </div>
+
+    <div class="keys" role="group" aria-label="Calculator keys">
+      <button class="key clear" data-action="clear" aria-label="Clear (Esc)">C</button>
+      <button class="key" data-action="back" aria-label="Backspace (Backspace)">⌫</button>
+      <button class="key operator" data-value="(" aria-label="Open parenthesis">(</button>
+      <button class="key operator" data-value=")" aria-label="Close parenthesis">)</button>
+
+      <button class="key" data-value="7">7</button>
+      <button class="key" data-value="8">8</button>
+      <button class="key" data-value="9">9</button>
+      <button class="key operator" data-value="÷" aria-label="Divide">÷</button>
+
+      <button class="key" data-value="4">4</button>
+      <button class="key" data-value="5">5</button>
+      <button class="key" data-value="6">6</button>
+      <button class="key operator" data-value="×" aria-label="Multiply">×</button>
+
+      <button class="key" data-value="1">1</button>
+      <button class="key" data-value="2">2</button>
+      <button class="key" data-value="3">3</button>
+      <button class="key operator" data-value="−" aria-label="Minus">−</button>
+
+      <button class="key" data-value="0">0</button>
+      <button class="key" data-value=".">.</button>
+      <button class="key operator" data-action="percent" aria-label="Percent">%</button>
+      <button class="key operator" data-value="+" aria-label="Plus">+</button>
+
+      <button class="key equal wide" data-action="equals" aria-label="Equals (Enter)">=</button>
+    </div>
+
+    <div class="help">
+      <div>Tip: Use keyboard — numbers, + - * /, %, Enter, Esc, Backspace</div>
+      <div style="font-weight:700;color:var(--muted)"></div>
+    </div>
+  </main>
+
+  <aside class="history" aria-label="History panel">
+    <div class="hist-header">
+      <div style="font-weight:700">History</div>
+      <div style="display:flex;gap:8px">
+        <button id="exportBtn" class="small-btn" title="Export history">⬇ Export</button>
+        <button id="importBtn" class="small-btn" title="Import history">⬆ Import</button>
+      </div>
+    </div>
+
+    <div id="histList" class="hist-list" role="list">
+      <div class="empty">No history yet — your past calculations will appear here.</div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:auto">
+      <button id="copyBtn" class="small-btn" title="Copy current expression">Copy Expr</button>
+      <button id="pasteBtn" class="small-btn" title="Paste expression from clipboard">Paste</button>
+    </div>
+  </aside>
+</div>
+
+<script>
+  // elements
+  const exprEl = document.getElementById('expression');
+  const previewEl = document.getElementById('preview');
+  const keys = document.querySelectorAll('button.key');
+  const histList = document.getElementById('histList');
+  const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+  const themeBtn = document.getElementById('themeBtn');
+  const exportBtn = document.getElementById('exportBtn');
+  const importBtn = document.getElementById('importBtn');
+  const copyBtn = document.getElementById('copyBtn');
+  const pasteBtn = document.getElementById('pasteBtn');
+
+  // state
+  let expression = '';
+  let history = loadHistory(); // array of {expr, result, time}
+  const MAX_HISTORY = 100;
+
+  // map display operators to eval ones
+  function toEvalString(s){
+    return s.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');
+  }
+
+  // safe evaluate, same pattern as earlier
+  function safeEvaluate(s){
+    if(!s || s.trim()==='') return '';
+    const candidate = toEvalString(s);
+    if(!/^[0-9+\-*/().\s]*$/.test(candidate)) throw new Error('Invalid characters');
+    return Function('"use strict"; return (' + candidate + ')')();
+  }
+
+  // update UI
+  function updateUI(){
+    exprEl.textContent = expression || '0';
+    try {
+      const val = safeEvaluate(expression);
+      if(val === undefined || val === null || Number.isNaN(val)) previewEl.textContent = '';
+      else previewEl.textContent = Number.isInteger(val) ? String(val) : parseFloat(val.toFixed(8)).toString();
+    } catch(e){
+      previewEl.textContent = 'Error';
+    }
+  }
+
+  // helpers for percent: convert last number segment to percent (divide by 100)
+  function applyPercent(){
+    // find last continuous number (including decimal) at end of expression
+    const match = expression.match(/([0-9]*\.?[0-9]+)$/);
+    if(match){
+      const numStr = match[1];
+      const num = parseFloat(numStr);
+      const percentValue = (num/100).toString();
+      expression = expression.slice(0, match.index) + percentValue;
+      updateUI();
+    } else {
+      // if no trailing number, do nothing
+    }
+  }
+
+  // pushing value
+  function pushValue(v){
+    // avoid leading zeros like "00" at start? keep simple
+    expression += v;
+    updateUI();
+  }
+
+  function clearAll(){
+    expression = '';
+    updateUI();
+  }
+  function backspace(){
+    expression = expression.slice(0,-1);
+    updateUI();
+  }
+  function doEquals(){
+    try {
+      const val = safeEvaluate(expression);
+      if(val === undefined) return;
+      const display = Number.isInteger(val) ? String(val) : parseFloat(val.toFixed(8)).toString();
+      // push to history
+      pushHistory(expression || '0', display);
+      expression = display;
+      updateUI();
+    } catch(e){
+      previewEl.textContent = 'Error';
+      // keep expression for user to edit
+    }
+  }
+
+  // history functions
+  function renderHistory(){
+    histList.innerHTML = '';
+    if(!history.length){
+      histList.innerHTML = '<div class="empty">No history yet — your past calculations will appear here.</div>';
+      return;
+    }
+    history.slice().reverse().forEach((h, idx) => {
+      const item = document.createElement('div');
+      item.className = 'hist-item';
+      item.setAttribute('role','listitem');
+      item.innerHTML = `<div class="hist-exp">${escapeHtml(h.expr)}</div><div class="hist-res">${escapeHtml(h.result)} • ${new Date(h.time).toLocaleString()}</div>`;
+      item.addEventListener('click', () => {
+        expression = h.expr;
+        updateUI();
+      });
+      histList.appendChild(item);
+    });
+  }
+
+  function pushHistory(expr, result){
+    history.push({expr, result, time: Date.now()});
+    if(history.length > MAX_HISTORY) history.shift();
+    saveHistory();
+    renderHistory();
+  }
+
+  function clearHistory(){
+    if(confirm('Clear all history?')) {
+      history = [];
+      saveHistory();
+      renderHistory();
+    }
+  }
+
+  function saveHistory(){
+    try { localStorage.setItem('bestoo_calc_history_v1', JSON.stringify(history)); } catch(e){}
+  }
+  function loadHistory(){
+    try {
+      const raw = localStorage.getItem('bestoo_calc_history_v1');
+      if(raw) return JSON.parse(raw);
+    } catch(e){}
+    return [];
+  }
+
+  // utility escape
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; });
+  }
+
+  // wire buttons
+  keys.forEach(btn=>{
+    const val = btn.dataset.value;
+    const action = btn.dataset.action;
+    btn.addEventListener('click', ()=>{
+      if(action === 'clear'){ clearAll(); return; }
+      if(action === 'back'){ backspace(); return; }
+      if(action === 'equals'){ doEquals(); return; }
+      if(action === 'percent'){ applyPercent(); return; }
+      if(val){ pushValue(val); return; }
+    });
+  });
+
+  // keyboard support
+  window.addEventListener('keydown', (e) => {
+    const key = e.key;
+    if(key >= '0' && key <= '9'){ pushValue(key); e.preventDefault(); return; }
+    if(key === '.' || key === '(' || key === ')'){ pushValue(key); e.preventDefault(); return; }
+    if(key === '+' || key === '-') { pushValue(key); e.preventDefault(); return; }
+    if(key === '*' || key === 'x' || key === 'X') { pushValue('×'); e.preventDefault(); return; }
+    if(key === '/') { pushValue('÷'); e.preventDefault(); return; }
+    if(key === 'Enter' || key === '=') { doEquals(); e.preventDefault(); return; }
+    if(key === 'Backspace') { backspace(); e.preventDefault(); return; }
+    if(key === 'Escape') { clearAll(); e.preventDefault(); return; }
+    if(key === '%'){ applyPercent(); e.preventDefault(); return; }
+    if(key.toLowerCase() === 't'){ toggleTheme(); e.preventDefault(); return; } // quick theme switch
+  });
+
+  // theme handling
+  function toggleTheme(){
+    const body = document.body;
+    const current = body.getAttribute('data-theme') || 'light';
+    const next = current === 'light' ? 'dark' : 'light';
+    body.setAttribute('data-theme', next);
+    themeBtn.textContent = next === 'light' ? '🌙 Theme' : '☀️ Theme';
+    try { localStorage.setItem('bestoo_calc_theme',''+next); } catch(e){}
+  }
+  // load theme
+  (function initTheme(){
+    try {
+      const saved = localStorage.getItem('bestoo_calc_theme') || 'light';
+      document.body.setAttribute('data-theme', saved);
+      themeBtn.textContent = saved === 'light' ? '🌙 Theme' : '☀️ Theme';
+    } catch(e){}
+  })();
+  themeBtn.addEventListener('click', toggleTheme);
+
+  // history controls
+  clearHistoryBtn.addEventListener('click', clearHistory);
+  exportBtn.addEventListener('click', ()=>{
+    const blob = new Blob([JSON.stringify(history, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'bestoo_calc_history.json'; document.body.appendChild(a); a.click();
+    URL.revokeObjectURL(url); a.remove();
+  });
+  importBtn.addEventListener('click', ()=>{
+    const input = document.createElement('input');
+    input.type='file'; input.accept='application/json';
+    input.onchange = ()=> {
+      const file = input.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev)=>{
+        try {
+          const parsed = JSON.parse(ev.target.result);
+          if(Array.isArray(parsed)){
+            history = parsed.slice(-MAX_HISTORY);
+            saveHistory(); renderHistory();
+            alert('History imported.');
+          } else alert('Invalid format.');
+        } catch(e){ alert('Import failed.'); }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  });
+
+  // copy/paste helpers
+  copyBtn.addEventListener('click', async ()=>{
+    try {
+      await navigator.clipboard.writeText(expression || '');
+      alert('Expression copied to clipboard.');
+    } catch(e){
+      alert('Copy failed.');
+    }
+  });
+  pasteBtn.addEventListener('click', async ()=>{
+    try {
+      const txt = await navigator.clipboard.readText();
+      // validate permitted characters
+      if(/^[0-9+\-*/().\s]*$/.test(toEvalString(txt))) {
+        expression += txt.trim();
+        updateUI();
+      } else alert('Clipboard contains invalid characters.');
+    } catch(e){ alert('Paste failed.'); }
+  });
+
+  // initial render
+  renderHistory();
+  updateUI();
+
+  // load saved history if any (already done at top)
+  // accessibility: focus expression when clicked
+  exprEl.addEventListener('click', ()=> exprEl.focus());
+
+  // save history periodically (in case)
+  setInterval(saveHistory, 5000);
+
+</script>
+</body>
+</html>
